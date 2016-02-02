@@ -1,4 +1,4 @@
-(function(window) {
+(function() {
 
     var resourceCache = {};
     var loading = [];
@@ -67,14 +67,4 @@
         }
     };
 
-    window.keyupHandler = function(e) {
-        var allowedKeys = {
-            37: 'left',
-            38: 'up',
-            39: 'right',
-            40: 'down'
-        };
-        window.player.handleInput(allowedKeys[e.keyCode]);
-    };
-
-}(this));
+}());
