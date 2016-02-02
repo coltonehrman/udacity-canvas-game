@@ -182,8 +182,8 @@
             if (LEVEL === 5) {ENEMY_SPEED = [1, 4]}
             if (LEVEL === 10) {ENEMY_SPEED = [2, 5]}
             if (LEVEL === 15) {ENEMY_SPEED = [3, 6]}
-            if (LEVEL === 17) {ENEMY_SPEED = [4, 7]}
-            if (LEVEL === 20) {ENEMY_SPEED = [5, 8]}
+            if (LEVEL === 20) {ENEMY_SPEED = [4, 7]}
+            if (LEVEL === 25) {ENEMY_SPEED = [5, 8]}
             ENEMIES.push( new Enemy() );
         });
         range(getRandom(1, LEVEL), function(){
