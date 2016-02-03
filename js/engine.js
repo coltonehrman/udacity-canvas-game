@@ -19,6 +19,9 @@
             }
             return touches;
         },
+        atTop: function() {
+            return this.row === 1;
+        },
         render: function() {
             CTX.drawImage(Resources.get(this.sprite), this.x, this.y);
         },
@@ -82,15 +85,6 @@
                 this.y = coords.y;
             }
         };
-        this.inMiddle = function() {
-            return this.row === SCREEN_MIDDLE_ROW && this.column === SCREEN_MIDDLE_COLUMN;
-        };
-        this.atTop = function() {
-            return this.row === 1;
-        };
-        this.atBottom = function() {
-            return this.row === SCREEN_ROWS;
-        };
         this.die = function() {
             LIVES--;
             SCORE -= PENALTY;
@@ -120,23 +114,25 @@
             39: 'right',
             40: 'down'
         };
-        console.log(e.keyCode);
         handleInput(allowedKeys[e.keyCode]);
     });
     //                                   ENEMY                                      //
     //////////////////////////////////////////////////////////////////////////////////
     var Enemy = function() {
+        this.row = ( chance(50) ) ? getRandom(2, 4) : getRandom(6, 8);
         this.x = getRandom(-1000, -100);
-        this.row = getRandom(2, 5);
         this.speed = getRandom.apply(this, ENEMY_SPEED);
         this.sprite = 'images/enemy-bug.png';
+        this.getRow = function() {
+            this.row = ( chance(50) ) ? getRandom(2, 4) : getRandom(6, 8);
+        };
     };
     Enemy.prototype = Object.create(GAME_OBJECT);
     Enemy.prototype.update = function(dt) {
         var coords = getCoords(this.row);
         if (this.x >= (CANVAS.width + 100)) {
-            this.x = getRandom(-1000, -100);
-            this.row = getRandom(2, 5);
+            this.x = getRandom(-2000, -100);
+            this.getRow();
         }
         this.x += dt * (this.speed * 100);
         this.y = coords.y;
@@ -145,8 +141,8 @@
     //////////////////////////////////////////////////////////////////////////////////
     var Key = function() {
         this.taken = false;
-        this.row = getRandom(2, 5);
-        this.column = getRandom(1, 7);
+        this.row = getRandom(2, 8);
+        this.column = getRandom(1, 9);
         this.sprite = 'images/Key.png';
         this.grab = function() {
             this.taken = true;
@@ -155,33 +151,33 @@
         };
         this.reset = function() {
             this.taken = false;
-            this.row = getRandom(2, 5);
-            this.column = getRandom(1, 7);
+            this.row = getRandom(2, 8);
+            this.column = getRandom(1, 9);
         };
     };
     Key.prototype = Object.create(GAME_OBJECT);
     var KEY = new Key();
     //                                   GEM                                        //
     //////////////////////////////////////////////////////////////////////////////////
-    var Gem = function() {
-        this.row = getRandom(2, 5);
-        this.column = getRandom(1, 7);
-        this.sprite = 'images/Gem-Blue.png';
+    var Gem = function(sprite) {
+        this.row = getRandom(2, 8);
+        this.column = getRandom(1, 9);
+        this.sprite = sprite;
     };
     Gem.prototype = Object.create(GAME_OBJECT);
     //                                  HEART                                       //
     //////////////////////////////////////////////////////////////////////////////////
     var Heart = function() {
-        this.row = getRandom(2, 5);
-        this.column = getRandom(1, 7);
+        this.row = getRandom(2, 8);
+        this.column = getRandom(1, 9);
         this.sprite = 'images/Heart.png';
     };
     Heart.prototype = Object.create(GAME_OBJECT);
     //                                  ROCK                                        //
     //////////////////////////////////////////////////////////////////////////////////
     var Rock = function() {
-        this.row = getRandom(2, 5);
-        this.column = getRandom(1, 7);
+        this.row = getRandom(2, 8);
+        this.column = getRandom(1, 9);
         this.sprite = 'images/Rock.png';
     };
     Rock.prototype = Object.create(GAME_OBJECT);
@@ -222,11 +218,11 @@
         if (LEVEL === 30) {ENEMY_SPEED = [7, 9];}
         if (LEVEL === 35) {ENEMY_SPEED = [8, 10];}
         if (LEVEL === 40) {ENEMY_SPEED = [9, 11];}
-        range(getRandom(3, 6), function(){
+        range(getRandom(8, 20), function(){
             ENEMIES.push( new Enemy() );
         });
-        range(getRandom(0, MAX_GEMS), function(){
-            GEMS.push( new Gem() );
+        range(getRandom(2, MAX_GEMS), function(){
+            GEMS.push( new Gem( GEM_SPRITES[getRandom(0, 2)] ) );
         });
         if (LIVES < 3) {
             if (chance(50)) {

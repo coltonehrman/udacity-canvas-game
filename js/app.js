@@ -5,12 +5,11 @@ var TILE_HEIGHT = 83;
 var TILE_WIDTH = 101;
 
 var CANVAS;
-var SCREEN_COLUMNS = 7;
-var SCREEN_MIDDLE_COLUMN = 4;
-var SCREEN_ROWS = 7;
-var SCREEN_MIDDLE_ROW = 4;
+var SCREEN_COLUMNS = 9;
+var SCREEN_MIDDLE_COLUMN = 5;
+var SCREEN_ROWS = 9;
+var SCREEN_MIDDLE_ROW = 5;
 
-var PLAYER;
 var ENEMIES = [];
 var ROCKS = [];
 var GEMS = [];
@@ -18,7 +17,7 @@ var HEARTS = [];
 
 var ENEMY_SPEED = [1, 3];
 var MAX_ENEMIES = 10;
-var MAX_GEMS = 5;
+var MAX_GEMS = 10;
 
 var LEVEL = 1;
 var SCORE = 0;
@@ -31,9 +30,16 @@ var GAME_OVER = false;
 var LAST_TIME;
 var LOOP;
 
+var GEM_SPRITES = [
+    'images/Gem-Blue.png',
+    'images/Gem-Orange.png',
+    'images/Gem-Green.png'
+];
+
 var WATER = 'images/water-block.png';
 var STONE = 'images/stone-block.png';
 var GRASS = 'images/grass-block.png';
+
 
 var PLAYER_SPRITE = 'images/char-boy.png';
 var CAT_GIRL = 'images/char-cat-girl.png';
@@ -47,8 +53,10 @@ var MAP = [
     STONE,
     STONE,
     STONE,
-    STONE,
     GRASS,
+    STONE,
+    STONE,
+    STONE,
     GRASS
 ];
 //                                   CANVAS                                     //
