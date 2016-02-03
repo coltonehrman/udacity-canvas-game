@@ -248,15 +248,13 @@
                 HEARTS.push( new Heart() );
             }
         }
-        if (LEVEL >= 20) {
-            range(getRandom(0, 1), function(){
+        range(getRandom(1, 2), function(){
+            ROCKS.push( new Rock() );
+        });
+        if ( chance(50) ) {
+            range(getRandom(1, 2), function(){
                 ROCKS.push( new Rock() );
             });
-            if (LEVEL >= 50) {
-                range(getRandom(1, 2), function(){
-                    ROCKS.push( new Rock() );
-                });
-            }
         }
         LAST_TIME = Date.now();
         main();
