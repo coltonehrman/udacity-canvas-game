@@ -16,8 +16,9 @@ var ROCKS = [];
 var GEMS = [];
 var HEARTS = [];
 
-var MAX_ENEMIES = 10;
 var ENEMY_SPEED = [1, 3];
+var MAX_ENEMIES = 10;
+var MAX_GEMS = 5;
 
 var LEVEL = 1;
 var SCORE = 0;
@@ -35,6 +36,10 @@ var STONE = 'images/stone-block.png';
 var GRASS = 'images/grass-block.png';
 
 var PLAYER_SPRITE = 'images/char-boy.png';
+var CAT_GIRL = 'images/char-cat-girl.png';
+var HORN_GIRL = 'images/char-horn-girl.png';
+var PINK_GIRL = 'images/char-pink-girl.png';
+var PRINCESS_GIRL = 'images/char-princess-girl.png';
 //                                    MAP                                       //
 //////////////////////////////////////////////////////////////////////////////////
 var MAP = [

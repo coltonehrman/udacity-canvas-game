@@ -67,4 +67,8 @@
         }
     };
 
+    window.chance = function(percentage) {
+        return Math.random() < (percentage / 100);
+    };
+
 }());

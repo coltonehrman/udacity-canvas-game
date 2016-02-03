@@ -1,44 +1,78 @@
 (function() {
+    //                               GAME OBJECT                                    //
+    //////////////////////////////////////////////////////////////////////////////////
+    var GAME_OBJECT = {
+        touches: function(other) {
+            var touches = false;
+            var myLeftSide = this.x;
+            var myRightSide = this.x + TILE_WIDTH;
+            var otherLeftSide = other.x;
+            var otherRightSide = other.x + TILE_WIDTH - 25;
+
+            if ( this.row === other.row ) {
+                if ( this.column === other.column ) {
+                    touches = true;
+                }
+                else if ( myLeftSide < otherRightSide && myLeftSide > otherLeftSide ) {
+                    touches = true;
+                }
+            }
+            return touches;
+        },
+        render: function() {
+            CTX.drawImage(Resources.get(this.sprite), this.x, this.y);
+        },
+        update: function() {
+            var coords = getCoords(this.row, this.column);
+            this.x = coords.x;
+            this.y = coords.y;
+        }
+    };
     //                                   PLAYER                                     //
     //////////////////////////////////////////////////////////////////////////////////
-    PLAYER = {
-        lastRow: 0,
-        lastColumn: 0,
-        row: SCREEN_ROWS,
-        column: SCREEN_MIDDLE_COLUMN,
-        sprite: PLAYER_SPRITE,
-        update: function() {
+    var Player = function() {
+        this.lastRow = SCREEN_ROWS;
+        this.lastColumn = SCREEN_MIDDLE_COLUMN;
+        this.row = SCREEN_ROWS;
+        this.column = SCREEN_MIDDLE_COLUMN;
+        this.sprite = PLAYER_SPRITE;
+        this.update = function() {
             var coords = getCoords(this.row, this.column);
             var hitRock = false;
             ROCKS.forEach(function(rock){
-                if ( touches({ x: coords.x, y: coords.y }, rock) ) {
-                    hitRock = true;;
+                if ( this.touches(rock) ) {
+                    hitRock = true;
                 }
-            });
+            }.bind(this));
+
+            if ( this.touches(KEY) ) {
+                KEY.grab();
+            }
+
+            GEMS = GEMS.filter(function(gem) {
+                if ( this.touches(gem) ) {
+                    SCORE += GEM_VALUE;
+                }
+                return !this.touches(gem);
+            }.bind(this));
+
+            HEARTS = HEARTS.filter(function(heart) {
+                if ( this.touches(heart) ) {
+                    LIVES++;
+                }
+                return !this.touches(heart);
+            }.bind(this));
 
             if (!hitRock) {
                 this.x = coords.x;
                 this.y = coords.y;
 
                 ENEMIES.forEach(function(enemy) {
-                    if ( touches(enemy, this) ) {
+                    if ( this.touches(enemy) ) {
                         this.die();
                     }
                 }.bind(this));
 
-                GEMS = GEMS.filter(function(gem) {
-                    if ( touches(gem, this) ) {
-                        SCORE += GEM_VALUE;
-                    }
-                    return !touches(gem, this);
-                }.bind(this));
-
-                HEARTS = HEARTS.filter(function(heart) {
-                    if ( touches(heart, this) ) {
-                        LIVES++;
-                    }
-                    return !touches(heart, this);
-                }.bind(this));
             }
             else {
                 this.row = this.lastRow;
@@ -47,45 +81,46 @@
                 this.x = coords.x;
                 this.y = coords.y;
             }
-        },
-        render: function() {
-            CTX.drawImage(Resources.get(this.sprite), this.x, this.y);
-        },
-        inMiddle: function() {
+        };
+        this.inMiddle = function() {
             return this.row === SCREEN_MIDDLE_ROW && this.column === SCREEN_MIDDLE_COLUMN;
-        },
-        atTop: function() {
+        };
+        this.atTop = function() {
             return this.row === 1;
-        },
-        atBottom: function() {
+        };
+        this.atBottom = function() {
             return this.row === SCREEN_ROWS;
-        },
-        die: function() {
+        };
+        this.die = function() {
             LIVES--;
             SCORE -= PENALTY;
             this.backToStart();
             if (LIVES === 0) {
                 GAME_OVER = true;
             }
-        },
-        setLast: function() {
+        };
+        this.setLast = function() {
             this.lastRow = this.row;
             this.lastColumn = this.column;
-        },
-        backToStart: function() {
+        };
+        this.backToStart = function() {
             this.row = SCREEN_ROWS;
             this.column = SCREEN_MIDDLE_COLUMN;
-        }
+        };
     };
+    Player.prototype = Object.create(GAME_OBJECT);
+    var PLAYER = new Player();
     //                             KEY EVENT HANDLER                                //
     //////////////////////////////////////////////////////////////////////////////////
     document.addEventListener('keyup', function(e) {
         var allowedKeys = {
+            32: 'space',
             37: 'left',
             38: 'up',
             39: 'right',
             40: 'down'
         };
+        console.log(e.keyCode);
         handleInput(allowedKeys[e.keyCode]);
     });
     //                                   ENEMY                                      //
@@ -96,6 +131,7 @@
         this.speed = getRandom.apply(this, ENEMY_SPEED);
         this.sprite = 'images/enemy-bug.png';
     };
+    Enemy.prototype = Object.create(GAME_OBJECT);
     Enemy.prototype.update = function(dt) {
         var coords = getCoords(this.row);
         if (this.x >= (CANVAS.width + 100)) {
@@ -105,9 +141,26 @@
         this.x += dt * (this.speed * 100);
         this.y = coords.y;
     };
-    Enemy.prototype.render = function() {
-        CTX.drawImage(Resources.get(this.sprite), this.x, this.y);
+    //                                   KEY                                        //
+    //////////////////////////////////////////////////////////////////////////////////
+    var Key = function() {
+        this.taken = false;
+        this.row = getRandom(2, 5);
+        this.column = getRandom(1, 7);
+        this.sprite = 'images/Key.png';
+        this.grab = function() {
+            this.taken = true;
+            this.column = 0;
+            this.row = 0;
+        };
+        this.reset = function() {
+            this.taken = false;
+            this.row = getRandom(2, 5);
+            this.column = getRandom(1, 7);
+        };
     };
+    Key.prototype = Object.create(GAME_OBJECT);
+    var KEY = new Key();
     //                                   GEM                                        //
     //////////////////////////////////////////////////////////////////////////////////
     var Gem = function() {
@@ -115,14 +168,7 @@
         this.column = getRandom(1, 7);
         this.sprite = 'images/Gem-Blue.png';
     };
-    Gem.prototype.update = function() {
-        var coords = getCoords(this.row, this.column);
-        this.x = coords.x;
-        this.y = coords.y;
-    }
-    Gem.prototype.render = function() {
-        CTX.drawImage(Resources.get(this.sprite), this.x, this.y);
-    };
+    Gem.prototype = Object.create(GAME_OBJECT);
     //                                  HEART                                       //
     //////////////////////////////////////////////////////////////////////////////////
     var Heart = function() {
@@ -130,14 +176,7 @@
         this.column = getRandom(1, 7);
         this.sprite = 'images/Heart.png';
     };
-    Heart.prototype.update = function() {
-        var coords = getCoords(this.row, this.column);
-        this.x = coords.x;
-        this.y = coords.y;
-    };
-    Heart.prototype.render = function() {
-        CTX.drawImage(Resources.get(this.sprite), this.x, this.y);
-    };
+    Heart.prototype = Object.create(GAME_OBJECT);
     //                                  ROCK                                        //
     //////////////////////////////////////////////////////////////////////////////////
     var Rock = function() {
@@ -145,14 +184,7 @@
         this.column = getRandom(1, 7);
         this.sprite = 'images/Rock.png';
     };
-    Rock.prototype.update = function() {
-        var coords = getCoords(this.row, this.column);
-        this.x = coords.x;
-        this.y = coords.y;
-    };
-    Rock.prototype.render = function() {
-        CTX.drawImage(Resources.get(this.sprite), this.x, this.y);
-    };
+    Rock.prototype = Object.create(GAME_OBJECT);
     //                                   MAIN                                       //
     //////////////////////////////////////////////////////////////////////////////////
     function main() {
@@ -164,7 +196,12 @@
 
         if (GAME_OVER) {
             CTX.font = '48px serif';
-            CTX.fillText("GAME OVER!", CANVAS.width / 2 - 150, CANVAS.height / 2);
+            CTX.fillStyle = '#fff';
+            CTX.lineWidth = 5;
+            CTX.strokeText("GAME OVER!", CANVAS.width / 2 - 150, CANVAS.height / 2 - 48);
+            CTX.strokeText("HIT 'SPACE' TO RESTART!", CANVAS.width / 2 - 300, CANVAS.height / 2);
+            CTX.fillText("GAME OVER!", CANVAS.width / 2 - 150, CANVAS.height / 2 - 48);
+            CTX.fillText("HIT 'SPACE' TO RESTART!", CANVAS.width / 2 - 300, CANVAS.height / 2);
         }
         else if (PAUSED) {
             cancelAnimationFrame(LOOP);
@@ -177,51 +214,51 @@
     //                                    INIT                                      //
     //////////////////////////////////////////////////////////////////////////////////
     function init() {
-        var maxEnemies = (LEVEL > MAX_ENEMIES) ? MAX_ENEMIES : (LEVEL > 6) ? LEVEL : 6;
-        range(getRandom(6, maxEnemies), function(){
-            if (LEVEL === 5) {ENEMY_SPEED = [1, 4]}
-            if (LEVEL === 10) {ENEMY_SPEED = [2, 5]}
-            if (LEVEL === 15) {ENEMY_SPEED = [3, 6]}
-            if (LEVEL === 20) {ENEMY_SPEED = [4, 7]}
-            if (LEVEL === 25) {ENEMY_SPEED = [5, 8]}
+        if (LEVEL === 5) {ENEMY_SPEED = [2, 4];}
+        if (LEVEL === 10) {ENEMY_SPEED = [3, 5];}
+        if (LEVEL === 15) {ENEMY_SPEED = [4, 6];}
+        if (LEVEL === 20) {ENEMY_SPEED = [5, 7];}
+        if (LEVEL === 25) {ENEMY_SPEED = [6, 8];}
+        if (LEVEL === 30) {ENEMY_SPEED = [7, 9];}
+        if (LEVEL === 35) {ENEMY_SPEED = [8, 10];}
+        if (LEVEL === 40) {ENEMY_SPEED = [9, 11];}
+        range(getRandom(3, 6), function(){
             ENEMIES.push( new Enemy() );
         });
-        range(getRandom(1, LEVEL), function(){
+        range(getRandom(0, MAX_GEMS), function(){
             GEMS.push( new Gem() );
         });
         if (LIVES < 3) {
-            if (getRandom(1,3) === 2) {
-                if (getRandom(1,5) === 3) {
+            if (chance(50)) {
+                if (chance(25)) {
                     range(2, function(){
-                        HEARTS.push(new Heart());
+                        HEARTS.push( new Heart() );
                     });
                 }
                 else {
-                    HEARTS.push(new Heart());
+                    HEARTS.push( new Heart() );
                 }
             }
             else {
                 if (LIVES === 1) {
                     range(getRandom(1, 2), function(){
-                        HEARTS.push(new Heart());
+                        HEARTS.push( new Heart() );
                     });
                 }
             }
         }
         else {
-            if (getRandom(1, 10) === 5) {
-                HEARTS.push(new Heart());
+            if (chance(10)) {
+                HEARTS.push( new Heart() );
             }
         }
-        if (LEVEL >= 5) {
-            if (LEVEL < 15) {
-                range(getRandom(0, 1), function(){
-                    ROCKS.push(new Rock());
-                });
-            }
-            else {
+        if (LEVEL >= 20) {
+            range(getRandom(0, 1), function(){
+                ROCKS.push( new Rock() );
+            });
+            if (LEVEL >= 50) {
                 range(getRandom(1, 2), function(){
-                    ROCKS.push(new Rock());
+                    ROCKS.push( new Rock() );
                 });
             }
         }
@@ -258,6 +295,16 @@
         ENEMIES = [];
         GEMS = [];
         ROCKS = [];
+        HEARTS = [];
+        KEY.reset();
+    }
+    function restart() {
+        GAME_OVER = false;
+        LIVES = 5;
+        SCORE = 0;
+        LEVEL = 1;
+        reset();
+        start();
     }
     //                                   UPDATE                                     //
     //////////////////////////////////////////////////////////////////////////////////
@@ -277,6 +324,7 @@
         ENEMIES.forEach(function(enemy) {
             enemy.update(dt);
         });
+        KEY.update();
         PLAYER.update();
     }
     //                                   RENDER                                     //
@@ -295,23 +343,25 @@
     }
     function renderText() {
         CTX.font = "16px serif";
+        CTX.fillStyle = '#fff';
         CTX.fillText("Level: " + LEVEL, 5, 20);
         CTX.fillText("Score: " + SCORE, 5, 40);
         CTX.fillText("Lives: " + LIVES, CANVAS.width - 55, 20);
     }
     function renderEntities() {
+        GEMS.forEach(function(gem) {
+            gem.render();
+        });
         ROCKS.forEach(function(rock) {
             rock.render();
         });
         HEARTS.forEach(function(heart) {
             heart.render();
         });
-        GEMS.forEach(function(gem) {
-            gem.render();
-        });
         ENEMIES.forEach(function(enemy) {
             enemy.render();
         });
+        KEY.render();
         PLAYER.render();
     }
     //                                 HANDLE INPUT                                 //
@@ -321,7 +371,12 @@
             PLAYER.setLast();
             PLAYER.row--;
             if (PLAYER.atTop()) {
-                nextLevel();
+                if (KEY.taken) {
+                    nextLevel();
+                }
+                else {
+                    PLAYER.row++;
+                }
             }
         }
         else if (key === 'down') {
@@ -342,6 +397,11 @@
                 PLAYER.column++;
             }
         }
+        else if (key === 'space') {
+            if (GAME_OVER) {
+                restart();
+            }
+        }
     }
     //                               HELPER FUNCTIONS                               //
     //////////////////////////////////////////////////////////////////////////////////
@@ -350,22 +410,6 @@
             x: TILE_WIDTH * (column - 1),
             y: TILE_HEIGHT * (row - 1) - TILE_HEIGHT
         };
-    }
-    function touches(piece1, piece2) {
-        var piece1Area = {
-            x: [piece1.x, piece1.x + TILE_WIDTH],
-            y: [piece1.y, piece1.y + TILE_HEIGHT]
-        };
-        var piece2Area = {
-            x: [piece2.x, piece2.x + TILE_WIDTH],
-            y: [piece2.y, piece2.y + TILE_HEIGHT]
-        };
-        if ( ((piece1Area.y[0] === piece2Area.y[0] && piece1Area.y[1] === piece2Area.y[1]) && (piece1Area.x[1] > piece2Area.x[0] && piece1Area.x[1] < piece2Area.x[1])) ||
-             //((piece1Area.y[0] === piece2Area.y[0] && piece1Area.y[1] === piece2Area.y[1]) && (piece1Area.x[0] > piece2Area.x[0] && piece1Area.x[0] < piece2Area.x[1])) ||
-             ((piece1Area.x[0] === piece2Area.x[0] && piece1Area.x[1] === piece2Area.x[1]) && (piece1Area.y[0] === piece2Area.y[0] && piece1Area.y[1] === piece2Area.y[1])) )
-        {
-            return true;
-        }
     }
     //                               LOADING RESOURCES                              //
     //////////////////////////////////////////////////////////////////////////////////
