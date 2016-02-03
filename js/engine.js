@@ -299,6 +299,7 @@
         KEY.reset();
     }
     function restart() {
+        ENEMY_SPEED = [1, 3];
         GAME_OVER = false;
         LIVES = 5;
         SCORE = 0;
