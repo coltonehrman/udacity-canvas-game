@@ -1,3 +1,12 @@
 body {
     text-align: center;
 }
+p {
+    margin: 0;
+}
+div {
+    max-width: 909px;
+    text-align: left;
+    margin: 0 auto;
+    padding: 0;
+}
