@@ -72,9 +72,18 @@
             if (KEY.taken) {
                 KEY.drop();
             }
-            this.backToStart();
+            PLAYER.backToStart();
             if (LIVES === 0) {
                 GAME_OVER = true;
+            }
+            else {
+                document.removeEventListener('keyup', keyupHandler);
+                pause();
+                setTimeout(function(){
+                    document.addEventListener('keyup', keyupHandler);
+                    PAUSED = false;
+                    main();
+                }.bind(this), 1000);
             }
         };
         this.setLast = function() {
@@ -239,13 +248,13 @@
     //                                   NEXT LEVEL                                 //
     //////////////////////////////////////////////////////////////////////////////////
     function nextLevel() {
-        document.removeEventListener('keyup', window.keyupHandler);
+        document.removeEventListener('keyup', keyupHandler);
         pause();
         setTimeout(function(){
             reset();
             LEVEL++;
             PLAYER.backToStart();
-            document.addEventListener('keyup', window.keyupHandler);
+            document.addEventListener('keyup', keyupHandler);
             start();
         }.bind(this), 1000);
     }
@@ -444,7 +453,8 @@
     }
     //                             KEY EVENT HANDLER                                //
     //////////////////////////////////////////////////////////////////////////////////
-    document.addEventListener('keyup', function(e) {
+    document.addEventListener('keyup', keyupHandler);
+    function keyupHandler(e) {
         var allowedKeys = {
             32: 'space',
             37: 'left',
@@ -453,7 +463,7 @@
             40: 'down'
         };
         handleInput(allowedKeys[e.keyCode]);
-    });
+    };
     //                               LOADING RESOURCES                              //
     //////////////////////////////////////////////////////////////////////////////////
     Resources.load([
