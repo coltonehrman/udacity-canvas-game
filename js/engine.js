@@ -69,8 +69,16 @@
             this.getX();
             this.getY();
             ENEMIES.forEach(function(enemy) {
+                var touchesRock = false;
                 if ( this.touches(enemy) ) {
-                    this.die();
+                    ROCKS.forEach(function(rock){
+                        if ( this.touches(rock) ) {
+                            touchesRock = true;
+                        }
+                    }.bind(this));
+                    if ( !touchesRock ) {
+                        this.die();
+                    }
                 }
             }.bind(this));
         };
@@ -284,6 +292,7 @@
         GEMS = [];
         ROCKS = [];
         HEARTS = [];
+        PLAYER.backToStart();
         KEY.reset();
     }
     function restart() {
