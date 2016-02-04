@@ -28,8 +28,8 @@
             var touches = false;
             var myLeftSide = this.x;
             var myRightSide = this.x + TILE_WIDTH;
-            var otherLeftSide = other.x + 25;
-            var otherRightSide = other.x + TILE_WIDTH - 25;
+            var otherLeftSide = other.x + 20;
+            var otherRightSide = other.x + TILE_WIDTH - 20;
 
             if ( this.row === other.row ) {
                 if ( this.column === other.column ) {
@@ -40,9 +40,17 @@
                         if ( myRightSide > otherLeftSide && myRightSide < otherRightSide ) {
                             touches = true;
                         }
+                        else if ( myLeftSide <= otherLeftSide + 20 && myRightSide >= otherRightSide) {
+                            touches = true;
+                        }
                     }
-                    else if ( myLeftSide < otherRightSide && myLeftSide > otherLeftSide ) {
-                        touches = true;
+                    else {
+                        if ( myLeftSide < otherRightSide && myLeftSide > otherLeftSide ) {
+                            touches = true;
+                        }
+                        else if ( myRightSide >= otherRightSide - 20 && myLeftSide <= otherLeftSide) {
+                            touches = true;
+                        }
                     }
                 }
             }
