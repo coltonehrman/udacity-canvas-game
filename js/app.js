@@ -6,8 +6,8 @@ var TILE_WIDTH = 101;
 
 var SCREEN_COLUMNS = 9;
 var SCREEN_MIDDLE_COLUMN = 5;
-var SCREEN_ROWS = 9;
-var SCREEN_MIDDLE_ROW = 5;
+var SCREEN_ROWS = 7;
+var SCREEN_MIDDLE_ROW = 4;
 
 var GAME_OBJECTS = [];
 var ENEMIES = [];
@@ -15,6 +15,7 @@ var ROCKS = [];
 var GEMS = [];
 var HEARTS = [];
 
+var QUANTIFIER = 1;
 var ENEMY_SPEED = [1, 3];
 var MAX_GEMS = 10;
 
@@ -49,6 +50,24 @@ var GEM_SPRITES = [
 var MAP = [
     WATER,
     STONE,
+    GRASS,
+    STONE,
+    GRASS,
+    STONE,
+    STONE,
+    STONE,
+    STONE,
+    STONE,
+    STONE,
+    STONE,
+    STONE,
+    STONE,
+    GRASS,
+    GRASS,
+    STONE,
+    GRASS,
+    GRASS,
+    STONE,
     STONE,
     STONE,
     GRASS,
@@ -57,7 +76,28 @@ var MAP = [
     STONE,
     GRASS
 ];
-var STONE_AREAS = [[2,4],[6,8]];
+var DISPLAY_TOP = MAP.length - SCREEN_ROWS + 1;
+var STONE_AREAS = [];
+var SECTION = [];
+MAP.forEach(function(row, index){
+    if (SECTION[0] === index && row !== STONE) {
+        SECTION.push(SECTION[0]);
+    }
+    if (SECTION.length === 2) {
+        if (row === STONE) {
+            SECTION.pop();
+        }
+        else {
+            STONE_AREAS.push(SECTION);
+            SECTION = [];
+        }
+    }
+    if (row === STONE) {
+        SECTION.push(index + 1);
+    }
+    //console.log(SECTION);
+});
+console.log(STONE_AREAS);
 //                                   CANVAS                                     //
 //////////////////////////////////////////////////////////////////////////////////
 var CANVAS = document.createElement('canvas');
