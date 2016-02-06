@@ -298,17 +298,15 @@
         KEY.reset();
     }
     function restart(level) {
-        if (level) {
-            reset();
-            start();
-        }
-        else {
+        if (!level) {
             ENEMY_SPEED = [1, 3];
             GAME_OVER = false;
             LIVES = 5;
             SCORE = 0;
             LEVEL = 1;
         }
+        reset();
+        start();
     }
     //                                   UPDATE                                     //
     //////////////////////////////////////////////////////////////////////////////////
@@ -339,9 +337,11 @@
         renderEntities();
     }
     function renderDisplay() {
-        for (var row = (DISPLAY_TOP - 1), num = 0; num < SCREEN_ROWS; row++, num++) {
+        for (var row = (DISPLAY_TOP - 1), num = 0; num < SCREEN_ROWS + 1; row++, num++) {
             for (var col = 0; col < SCREEN_COLUMNS; col++) {
-                CTX.drawImage(Resources.get(MAP[row]), col * TILE_WIDTH, (num * TILE_HEIGHT) - 50);
+                if (MAP[row]) {
+                    CTX.drawImage(Resources.get(MAP[row]), col * TILE_WIDTH, (num * TILE_HEIGHT) - 50);
+                }
             }
         }
     }

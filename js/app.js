@@ -49,21 +49,10 @@ var GEM_SPRITES = [
 //////////////////////////////////////////////////////////////////////////////////
 var MAP = [
     WATER,
-    STONE,
-    GRASS,
-    STONE,
-    GRASS,
-    STONE,
-    STONE,
-    STONE,
-    STONE,
-    STONE,
-    STONE,
-    STONE,
-    STONE,
-    STONE,
     GRASS,
     GRASS,
+    STONE,
+    STONE,
     STONE,
     GRASS,
     GRASS,
@@ -71,8 +60,6 @@ var MAP = [
     STONE,
     STONE,
     GRASS,
-    STONE,
-    STONE,
     STONE,
     GRASS
 ];
