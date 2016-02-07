@@ -60,6 +60,7 @@
     //                                   PLAYER                                     //
     //////////////////////////////////////////////////////////////////////////////////
     var Player = function() {
+        this.dieSound = new Audio('sounds/splat.wav');
         this.lastRow;
         this.lastColumn;
         this.row = SCREEN_ROWS;
@@ -83,11 +84,9 @@
             }.bind(this));
         };
         this.die = function() {
+            this.dieSound.play();
             LIVES--;
             SCORE -= PENALTY;
-            if (KEY.taken) {
-                KEY.drop();
-            }
             if (LIVES === 0) {
                 GAME_OVER = true;
             }
@@ -148,6 +147,7 @@
     //                                   KEY                                        //
     //////////////////////////////////////////////////////////////////////////////////
     var Key = function() {
+        this.sound = new Audio('sounds/success.wav');
         this.taken = false;
         this.row = getRandom(2, MAP.length - 1) - (DISPLAY_TOP - 1);
         this.column = getRandom(1, SCREEN_COLUMNS);
@@ -156,11 +156,6 @@
             this.taken = true;
             this.column = 0;
             this.row = 0;
-        };
-        this.drop = function() {
-            this.taken = false;
-            this.row = PLAYER.row;
-            this.column = PLAYER.column;
         };
         this.reset = function() {
             this.taken = false;
@@ -172,6 +167,7 @@
             this.getY();
             if ( this.touches(PLAYER) ) {
                 this.take();
+                this.sound.play();
             }
         };
     };
@@ -180,6 +176,7 @@
     //                                   GEM                                        //
     //////////////////////////////////////////////////////////////////////////////////
     var Gem = function(sprite) {
+        this.sound = new Audio('sounds/ding-1.mp3');
         this.row = getRandom(2, MAP.length - 1) - (DISPLAY_TOP - 1);
         this.column = getRandom(1, SCREEN_COLUMNS);
         this.sprite = sprite;
@@ -189,6 +186,7 @@
         this.getX();
         this.getY();
         if ( this.touches(PLAYER) ) {
+            this.sound.play();
             SCORE += GEM_VALUE;
             this.remove();
         }
@@ -196,6 +194,7 @@
     //                                  HEART                                       //
     //////////////////////////////////////////////////////////////////////////////////
     var Heart = function() {
+        this.sound = new Audio('sounds/life.wav');
         this.row = getRandom(2, MAP.length - 1) - (DISPLAY_TOP - 1);
         this.column = getRandom(1, SCREEN_COLUMNS);
         this.sprite = 'images/Heart.png';
@@ -205,6 +204,7 @@
         this.getX();
         this.getY();
         if ( this.touches(PLAYER) ) {
+            this.sound.play();
             LIVES++;
             this.remove();
         }
@@ -221,6 +221,7 @@
         this.getX();
         this.getY();
         if ( this.touches(PLAYER) ) {
+            new Audio('sounds/hitrock.wav').play();
             PLAYER.row = PLAYER.lastRow;
             PLAYER.column = PLAYER.lastColumn;
             PLAYER.update();
@@ -246,6 +247,7 @@
         render();
 
         if (GAME_OVER) {
+            new Audio('sounds/gameover.mp3').play();
             CTX.font = '48px serif';
             CTX.fillStyle = '#fff';
             CTX.lineWidth = 5;
@@ -265,6 +267,7 @@
     //                                   NEXT LEVEL                                 //
     //////////////////////////////////////////////////////////////////////////////////
     function nextLevel() {
+        new Audio('sounds/nextlevel.wav').play();
         document.removeEventListener('keyup', keyupHandler);
         pause();
         setTimeout(function(){
@@ -488,11 +491,13 @@
     //////////////////////////////////////////////////////////////////////////////////
     function handleInput(key) {
         var moveBack = false;
+        new Audio('sounds/move.ogg').play();
         if (key === 'up') {
             if ( (DISPLAY_TOP !== 1) && (PLAYER.inMiddle()) ) {
                 moveMapUp();
                 ROCKS.forEach(function(rock){
                     if (PLAYER.touches(rock)) {
+                        new Audio('sounds/hitrock.wav').play();
                         moveBack = true;
                     }
                 });
@@ -507,6 +512,7 @@
                         nextLevel();
                     }
                     else {
+                        new Audio('sounds/fail.wav').play();
                         PLAYER.row++;
                     }
                 }
@@ -524,6 +530,7 @@
                 });
                 ROCKS.forEach(function(rock){
                     if (PLAYER.touches(rock)) {
+                        new Audio('sounds/hitrock.wav').play();
                         moveBack = true;
                     }
                 });
@@ -534,6 +541,7 @@
                 if (PLAYER.row !== SCREEN_ROWS) {
                     PLAYER.setLast();
                     PLAYER.row++;
+                    PLAYER.moveSound.play();
                 }
             }
         }
@@ -541,12 +549,14 @@
             if (PLAYER.column !== 1) {
                 PLAYER.setLast();
                 PLAYER.column--;
+                PLAYER.moveSound.play();
             }
         }
         else if (key === 'right') {
             if (PLAYER.column !== SCREEN_COLUMNS) {
                 PLAYER.setLast();
                 PLAYER.column++;
+                PLAYER.moveSound.play();
             }
         }
         else if (key === 'space') {

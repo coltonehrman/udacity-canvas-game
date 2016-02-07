@@ -59,6 +59,20 @@ var MAP = [
     STONE,
     STONE,
     STONE,
+    STONE,
+    GRASS,
+    GRASS,
+    STONE,
+    STONE,
+    STONE,
+    GRASS,
+    GRASS,
+    STONE,
+    STONE,
+    STONE,
+    STONE,
+    STONE,
+    STONE,
     GRASS,
     STONE,
     GRASS
@@ -82,9 +96,15 @@ MAP.forEach(function(row, index){
     if (row === STONE) {
         SECTION.push(index + 1);
     }
-    //console.log(SECTION);
 });
-console.log(STONE_AREAS);
+
+var MUSIC = new Audio('sounds/background-music.wav');
+MUSIC.addEventListener('ended', function() {
+    this.currentTime = 0;
+    this.play();
+}, false);
+MUSIC.play();
+
 //                                   CANVAS                                     //
 //////////////////////////////////////////////////////////////////////////////////
 var CANVAS = document.createElement('canvas');
