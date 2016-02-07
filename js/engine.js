@@ -336,8 +336,8 @@
     //////////////////////////////////////////////////////////////////////////////////
     function render() {
         renderDisplay();
-        renderText();
         renderEntities();
+        renderText();
     }
     function renderDisplay() {
         for (var row = (DISPLAY_TOP - 1), num = 0; num < SCREEN_ROWS + 1; row++, num++) {
@@ -349,11 +349,10 @@
         }
     }
     function renderText() {
-        CTX.font = "16px serif";
-        CTX.fillStyle = '#fff';
-        CTX.fillText("Level: " + LEVEL, 5, 20);
-        CTX.fillText("Score: " + SCORE, 5, 40);
-        CTX.fillText("Lives: " + LIVES, CANVAS.width - 55, 20);
+        CTX.font = "20px 'Nunito'";
+        CTX.fillText("Level: " + LEVEL, 10, 20);
+        CTX.fillText("Score: " + SCORE, 10, 40);
+        CTX.fillText("Lives: " + LIVES, CANVAS.width - 80, 20);
     }
     function renderEntities() {
         GEMS.forEach(function(gem) {
@@ -403,7 +402,6 @@
             else if (length === 4) {numEnemies = 4;}
             else if (length === 5) {numEnemies = 5;}
             else {numEnemies = 6;}
-            console.log(numEnemies);
             //numEnemies = length * QUANTIFIER;
             range(numEnemies, function(){
                 var direction = (chance(50)) ? 'left' : 'right';
