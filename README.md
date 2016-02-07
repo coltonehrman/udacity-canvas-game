@@ -1,6 +1,6 @@
 # View My Completed Game
 
-Hosted by Github Pages <a href="https://coltonehrman.github.io/udacity-canvas-game">HERE</a>
+Hosted by Github Pages <a href="https://coltonehrman.github.io/udacity-canvas-game">here</a>
 
 ## How to Run?
 
