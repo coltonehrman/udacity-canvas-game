@@ -177,6 +177,7 @@
     //////////////////////////////////////////////////////////////////////////////////
     var Gem = function(sprite) {
         this.sound = new Audio('sounds/ding-1.mp3');
+        this.sound.volume = 0.15;
         this.row = getRandom(2, MAP.length - 1) - (DISPLAY_TOP - 1);
         this.column = getRandom(1, SCREEN_COLUMNS);
         this.sprite = sprite;
