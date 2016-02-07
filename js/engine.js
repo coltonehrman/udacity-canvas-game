@@ -387,17 +387,24 @@
         STONE_AREAS.forEach(function(area){
             var length = area[1] - area[0] + 1;
             var numEnemies;
-            if (LEVEL === 5) {QUANTIFIER = 2;}
-            if (LEVEL === 10) {QUANTIFIER = 3;}
-            if (LEVEL === 15) {QUANTIFIER = 4;}
-            if (LEVEL === 20) {QUANTIFIER = 5;}
-            if (LEVEL === 25) {QUANTIFIER = 6;}
-            if (LEVEL === 30) {QUANTIFIER = 7;}
-            if (LEVEL === 35) {QUANTIFIER = 8;}
-            if (LEVEL === 40) {QUANTIFIER = 9;}
-            if (LEVEL === 45) {QUANTIFIER = 10;}
-            if (LEVEL === 50) {QUANTIFIER = 11;}
-            var numEnemies = length * QUANTIFIER;
+            // if (LEVEL === 5) {QUANTIFIER = 2;}
+            // if (LEVEL === 10) {QUANTIFIER = 3;}
+            // if (LEVEL === 15) {QUANTIFIER = 4;}
+            // if (LEVEL === 20) {QUANTIFIER = 5;}
+            // if (LEVEL === 25) {QUANTIFIER = 6;}
+            // if (LEVEL === 30) {QUANTIFIER = 7;}
+            // if (LEVEL === 35) {QUANTIFIER = 8;}
+            // if (LEVEL === 40) {QUANTIFIER = 9;}
+            // if (LEVEL === 45) {QUANTIFIER = 10;}
+            // if (LEVEL === 50) {QUANTIFIER = 11;}
+            if (length === 1) {numEnemies = 1;}
+            else if (length === 2) {numEnemies = 2;}
+            else if (length === 3) {numEnemies = 3;}
+            else if (length === 4) {numEnemies = 4;}
+            else if (length === 5) {numEnemies = 5;}
+            else {numEnemies = 6;}
+            console.log(numEnemies);
+            //numEnemies = length * QUANTIFIER;
             range(numEnemies, function(){
                 var direction = (chance(50)) ? 'left' : 'right';
                 ENEMIES.push( new Enemy(area, direction) );
@@ -541,7 +548,6 @@
                 if (PLAYER.row !== SCREEN_ROWS) {
                     PLAYER.setLast();
                     PLAYER.row++;
-                    PLAYER.moveSound.play();
                 }
             }
         }
@@ -549,14 +555,12 @@
             if (PLAYER.column !== 1) {
                 PLAYER.setLast();
                 PLAYER.column--;
-                PLAYER.moveSound.play();
             }
         }
         else if (key === 'right') {
             if (PLAYER.column !== SCREEN_COLUMNS) {
                 PLAYER.setLast();
                 PLAYER.column++;
-                PLAYER.moveSound.play();
             }
         }
         else if (key === 'space') {
