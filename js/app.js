@@ -50,10 +50,12 @@ var GEM_SPRITES = [
 var MAP = [
     WATER,
     STONE,
+    GRASS,
     STONE,
     STONE,
+    GRASS,
     STONE,
-    STONE,
+    GRASS,
     GRASS
 ];
 var DISPLAY_TOP = MAP.length - SCREEN_ROWS + 1;

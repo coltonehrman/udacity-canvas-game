@@ -10,9 +10,19 @@ var Utils = function() {
         return Math.random() < (percent / 100);
     };
 
-    this.getRandom = function() {
+    this.getRandom = function(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     };
+
+	this.loop = function(num, func) {
+		for (var i = 0; i < num; i++) {
+			func();
+		}
+	};
+
+	this.inArray = function(arr, item) {
+		return arr.indexOf(item) !== -1;
+	};
 
 };
 var _ = new Utils();
