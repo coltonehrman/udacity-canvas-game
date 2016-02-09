@@ -11,6 +11,11 @@ var Engine = (function(global) {
     canvas.id = 'canvas';
     d.body.appendChild(canvas);
 
+    var map = d.createElement('canvas');
+    mapCtx = map.getContext('2d');
+    map.width = 101 * gameProperties.SCREEN_COLUMNS;
+    map.height = 171 + (83 * gameProperties.SCREEN_ROWS) - 75;
+
     function main() {
         var now = Date.now();
         var dt = (now - lastTime) / 1000.0;
@@ -23,6 +28,23 @@ var Engine = (function(global) {
     }
 
     function init() {
+        var rowImages = [
+            'images/water-block.png',
+            'images/stone-block.png',
+            'images/stone-block.png',
+            'images/stone-block.png',
+            'images/stone-block.png',
+            'images/stone-block.png',
+            'images/grass-block.png'
+        ];
+        var row;
+        var col;
+        for (row = 0; row < gameProperties.SCREEN_ROWS; row++) {
+            for (col = 0; col < gameProperties.SCREEN_COLUMNS; col++) {
+                mapCtx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83 + 7);
+            }
+        }
+
         lastTime = Date.now();
         main();
     }
@@ -39,7 +61,6 @@ var Engine = (function(global) {
             });
             player.update();
         }
-        //collectibleManager.update();
     }
 
     function render() {
@@ -51,23 +72,7 @@ var Engine = (function(global) {
 
     function renderBackground() {
         ctx.clearRect(0 , 0 , canvas.width, canvas.height);
-        var rowImages = [
-            'images/water-block.png',   // Top row is water
-            'images/stone-block.png',   // Row 1 of 3 of stone
-            'images/stone-block.png',   // Row 2 of 3 of stone
-            'images/stone-block.png',   // Row 3 of 3 of stone
-            'images/stone-block.png',   // Row 2 of 3 of stone
-            'images/stone-block.png',   // Row 3 of 3 of stone
-            'images/grass-block.png'    // Row 2 of 2 of grass
-        ];
-        var row;
-        var col;
-
-        for (row = 0; row < gameProperties.SCREEN_ROWS; row++) {
-            for (col = 0; col < gameProperties.SCREEN_COLUMNS; col++) {
-                ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83 + 7);
-            }
-        }
+        ctx.drawImage(map, 0, 0);
     }
 
     function renderGameInfo() {

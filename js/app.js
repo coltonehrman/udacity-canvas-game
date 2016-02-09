@@ -19,62 +19,100 @@
     };
 
 
-    var MovableItem = function(row, column, sprite) {
-        this.startingRow = row;
-        this.startingColumn = column;
-        this.row = row;
-        this.column = column;
-        this.offsetY = 50;
-
+    var MovableItem = function(row, column, width, sprite) {
         RenderableItem.call(this, null, null, sprite);
+        this.row = this.startingRow = row;
+        this.column = this.startingColumn = column;
+        this.offsetY = 50;
+        this.width = width;
         this.setXY();
     };
     MovableItem.inheritsFrom(RenderableItem);
-    MovableItem.prototype.setX = function() { this.x = this.TILE_WIDTH * (this.column - 1); };
-    MovableItem.prototype.setY = function() { this.y = (this.TILE_HEIGHT * (this.row - 1) - this.TILE_HEIGHT) + this.offsetY; };
-    MovableItem.prototype.setXY = function() { this.setX(); this.setY(); };
-    MovableItem.prototype.leftSide = function() { return this.x; };
-    MovableItem.prototype.rightSide = function() { return this.leftSide() + this.TILE_WIDTH };
-    MovableItem.prototype.onColumn = function() { return ( this.x !== 0 ) ? Math.floor(this.x / this.TILE_WIDTH) : 0; };
+    MovableItem.prototype.setX = function() {
+        this.x = this.TILE_WIDTH * (this.column - 1);
+    };
+    MovableItem.prototype.setY = function() {
+        this.y = (this.TILE_HEIGHT * (this.row - 1) - this.TILE_HEIGHT) + this.offsetY;
+    };
+    MovableItem.prototype.setXY = function() {
+        this.setX();
+        this.setY();
+    };
+    MovableItem.prototype._midPoint = function() {
+        return this.x + (this.TILE_WIDTH / 2);
+    };
+    MovableItem.prototype._leftSide = function() {
+        return ( this.width ) ? this._midPoint() - (this.width / 2) : this.x;
+    };
+    MovableItem.prototype._rightSide = function() {
+        return ( this.width ) ? this._midPoint() + (this.width / 2) : this.x + this.TILE_WIDTH;
+    };
     MovableItem.prototype.resetPosition = function() {
         this.row = this.startingRow;
         this.column = this.startingColumn;
         this.setXY();
     };
     MovableItem.prototype.collidesWith = function(item) {
-        if ( item.row === this.row ) {
-            if ( item.column === this.column ) {
+        if ( this.row === item.row ) {
+            if ( this.column === item.column ) {
                 return true;
             }
             else {
-                if ( item.leftSide() < this.rightSide() && item.leftSide() > this.leftSide() ) {
-                    return true;
+                if ( item.direction === 'left' ) {
+                    if ( this._rightSide() >= item._leftSide() && this._rightSide() <= item._rightSide() ) {
+                        return true;
+                    }
+                    else if ( this._leftSide() <= item._midPoint() && this._rightSide() >= item._rightSide() ) {
+                        return true;
+                    }
                 }
-                else if ( item.rightSide() >= this.rightSide() - 20 && item.leftSide() <= this.leftSide() ) {
-                    return true;
+                else if ( item.direction === 'right' ) {
+                    if ( this._leftSide() <= item._rightSide() && this._leftSide() >= item._leftSide() ) {
+                        return true;
+                    }
+                    else if ( this._rightSide() >= item._midPoint() && this._leftSide() <= item._leftSide() ) {
+                        return true;
+                    }
                 }
             }
-            return false;
         }
+        return false;
     };
 
 
     var Player = function() {
-        MovableItem.call(this, gameProperties.SCREEN_ROWS, gameProperties.SCREEN_MIDDLE_COLUMN);
+        MovableItem.call(this, this._startRow(), this._startColumn(), this._width);
+        this._setLastPosition();
         this.sound = 'sounds/move.ogg';
-        this.lastRow = this.row;
-        this.lastColumn = this.column;
     };
     Player.inheritsFrom(MovableItem);
-    Player.prototype.setCharacter = function(sprite) { this.sprite = sprite; };
+    Player.prototype._startRow = function() {
+        return gameProperties.SCREEN_ROWS;
+    };
+    Player.prototype._startColumn = function() {
+        return gameProperties.SCREEN_MIDDLE_COLUMN;
+    };
+    Player.prototype._width = 66;
+    Player.prototype.setCharacter = function(sprite) {
+        this.sprite = sprite;
+    };
     Player.prototype.update = function() {
         this.setXY();
         this._checkCollectibleCollisions();
+        this._checkRockCollisions();
         this._checkEnemyCollisions();
+    };
+    Player.prototype._setLastPosition = function() {
+        this.lastRow = this.row;
+        this.lastColumn = this.column;
+    };
+    Player.prototype._goToLastPosition = function() {
+        this.row = this.lastRow;
+        this.column = this.lastColumn;
     };
     Player.prototype._checkEnemyCollisions = function() {
         allEnemies.forEach(function(enemy){
-            if ( enemy.collidesWith(this) ) {
+            if ( this.collidesWith(enemy) ) {
                 gameProperties.playerCollidedWithEnemy(this.row, this.column, enemy.points);
             }
         }.bind(this));
@@ -82,7 +120,7 @@
     Player.prototype._checkCollectibleCollisions = function() {
         var collectibles = collectibleManager.currentCollectibles;
         collectibles.forEach(function(collectible, index){
-            if ( collectible.collidesWith(this) ) {
+            if ( this.collidesWith(collectible) ) {
                 collectibleManager.currentCollectibles.splice(index, 1);
                 collectible.sound.play();
                 switch ( collectible.type ) {
@@ -90,10 +128,10 @@
                         gameProperties.playerCollectedGem(this.row, this.column, collectible.points);
                         break;
                     case 'heart':
-                        gameProperties.playerCollectedHeart(this.row, this.column);
+                        gameProperties.lives++;
                         break;
                     case 'key':
-                        gameProperties.playerCollectedKey(this.row, this.column, collectible.points);
+                        collectibleManager.keyTaken = true;
                         break;
                 }
             }
@@ -102,10 +140,9 @@
     Player.prototype._checkRockCollisions = function() {
         var rocks = rockManager.currentRocks;
         rocks.forEach(function(rock){
-            if ( rock.collidesWith(this) ) {
-                new Audio(rock.sound).play();
-                this.row = this.lastRow;
-                this.column = this.lastColumn;
+            if ( this.collidesWith(rock) ) {
+                this._goToLastPosition();
+                this.setXY();
             }
         }.bind(this));
     };
@@ -125,40 +162,33 @@
                 break;
         }
     };
-    Player.prototype._reachTopRow = function() { return this.row - 1 === 1; };
+    Player.prototype._reachTopRow = function() {
+        return this.row - 1 === 1;
+    };
     Player.prototype._moveLeft = function() {
         new Audio(this.sound).play();
         if ( this.column !== 1 ) {
-            this.lastColumn = this.column;
-            this.lastRow = this.row;
+            this._setLastPosition();
             this.column--;
-            this._checkCollectibleCollisions();
-            this._checkRockCollisions();
         }
     };
     Player.prototype._moveRight = function() {
         new Audio(this.sound).play();
         if ( this.column !== gameProperties.SCREEN_COLUMNS ) {
-            this.lastColumn = this.column;
-            this.lastRow = this.row;
+            this._setLastPosition();
             this.column++;
-            this._checkCollectibleCollisions();
-            this._checkRockCollisions();
         }
     };
     Player.prototype._moveDown = function() {
         new Audio(this.sound).play();
         if ( this.row !== gameProperties.SCREEN_ROWS ) {
-            this.lastRow = this.row;
-            this.lastColumn = this.column;
+            this._setLastPosition();
             this.row++;
-            this._checkCollectibleCollisions();
-            this._checkRockCollisions();
         }
     };
     Player.prototype._moveUp = function() {
         if ( this._reachTopRow() ) {
-            if ( collectibleManager.hasKey ) {
+            if ( collectibleManager.keyTaken ) {
                 this.row--;
                 gameProperties.playerReachedTopRow(this.column);
             }
@@ -168,25 +198,23 @@
         }
         else {
             new Audio(this.sound).play();
-            this.lastRow = this.row;
-            this.lastColumn = this.column;
+            this._setLastPosition();
             this.row--;
-            this._checkCollectibleCollisions();
-            this._checkRockCollisions();
         }
     };
 
 
     var Enemy = function() {
+        MovableItem.call(this, this.generateRow(), null, null);
         this._getDirection();
-        MovableItem.call(this, this.generateRow(), null, 'images/enemy-bug-face-' + this.direction + '.png');
         this.x = this._getXPosition();
-        this.points = -100;
         this.setSpeed();
+        this.sprite = 'images/enemy-bug-face-' + this.direction + '.png'
     };
     Enemy.inheritsFrom(MovableItem);
+    Enemy.prototype.points = -100;
     Enemy.prototype.generateRow = function() { return _.getRandom(2, gameProperties.SCREEN_ROWS - 1); };
-    Enemy.prototype._getXPosition = function() { return ( this.direction === 'right' ) ? _.getRandom(-1000, -100) : _.getRandom(677 + 100, 677 + 1000); };
+    Enemy.prototype._getXPosition = function() { return ( this.direction === 'right' ) ? _.getRandom(-1000, -100) : _.getRandom(909 + 100, 909 + 1000); };
     Enemy.prototype._getDirection = function() { this.direction = ( _.chance(50) ) ? 'right' : 'left' };
     Enemy.prototype.update = function(dt) {
         if ( this.direction === 'right' ) {
@@ -204,20 +232,20 @@
     };
     Enemy.prototype.reset = function() {
         this._getDirection();
-        this.sprite = 'images/enemy-bug-face-' + this.direction + '.png';
         this.resetPosition();
         this.setSpeed();
+        this.sprite = 'images/enemy-bug-face-' + this.direction + '.png';
     };
     Enemy.prototype.resetPosition = function() {
+        this.x = this._getXPosition();
         this.row = this.generateRow();
         this.setY();
-        this.x = this._getXPosition();
     };
-    Enemy.prototype.setSpeed = function() { this.speed = _.getRandom(1, 5); };
+    Enemy.prototype.setSpeed = function() { this.speed = _.getRandom(1, 4); };
 
 
     var Collectible = function(row, column, type, sound, points, sprite) {
-        MovableItem.call(this, row, column, sprite);
+        MovableItem.call(this, row, column, null, sprite);
         this.type = type;
         this.sound = sound;
         this.points = points;
@@ -227,7 +255,7 @@
 
     var CollectibleManager = function() {
         GameItem.call(this);
-        this.hasKey = false;
+        this.keyTaken = false;
         this.gem = {
             sound: 'sounds/ding-1.mp3',
             many: [5, 10],
@@ -243,8 +271,7 @@
         };
         this.key = {
             sound: 'sounds/success.wav',
-            sprite: 'images/Key.png',
-            points: 100
+            sprite: 'images/Key.png'
         };
         this.currentCollectibles = [];
         this.makeCollectibles();
@@ -283,7 +310,7 @@
         var column;
         var sound;
 
-        if ( _.chance(10) ) {
+        if ( _.chance(15) ) {
             row = this._getRow();
             column = this._getColumn();
             sound = new Audio(this.heart.sound);
@@ -296,7 +323,7 @@
             columns.push(column);
             this.currentCollectibles.push(new Collectible(row, column, 'heart', sound, null, this.heart.sprite));
         }
-        if ( gameProperties.lives === 1 ) {
+        if ( gameProperties.lives === 1 && _.chance(85) ) {
             row = this._getRow();
             column = this._getColumn();
             sound = new Audio(this.heart.sound);
@@ -314,12 +341,12 @@
         var row = this._getRow();
         var column = this._getColumn();
         var sound = new Audio(this.key.sound);
-        this.currentCollectibles.push(new Collectible(row, column, 'key', sound, this.key.points, this.key.sprite));
+        this.currentCollectibles.push(new Collectible(row, column, 'key', sound, null, this.key.sprite));
     };
     CollectibleManager.prototype.dropKey = function (row, column) {
         var sound = new Audio(this.key.sound);
-        this.currentCollectibles.push(new Collectible(row, column, 'key', sound, this.key.points, this.key.sprite));
-        this.hasKey = false;
+        this.currentCollectibles.push(new Collectible(row, column, 'key', sound, null, this.key.sprite));
+        this.keyTaken = false;
     };
     CollectibleManager.prototype._getRow = function() {
         return  _.getRandom(2, gameProperties.SCREEN_ROWS - 1);
@@ -329,17 +356,13 @@
     };
     CollectibleManager.prototype.resetCollectibles = function() {
         this.removeCollectibles();
-        this.hasKey = false;
+        this.keyTaken = false;
         this.makeCollectibles();
-    };
-    CollectibleManager.prototype.update = function() {
-
     };
 
 
     var Rock = function(row, column) {
-        MovableItem.call(this, row, column, 'images/Rock.png');
-        this.sound = 'sounds/hitrock.wav';
+        MovableItem.call(this, row, column, null, 'images/Rock.png');
     };
     Rock.inheritsFrom(MovableItem);
 
@@ -356,7 +379,7 @@
         var columns = [];
         var row;
         var column;
-        _.loop(_.getRandom(5, 10), function(){
+        _.loop(_.getRandom(7, 10), function(){
             row = this._getRow();
             column = this._getColumn();
 
@@ -496,9 +519,7 @@
         };
         this.sounds.died.volume = 0.5;
         this.sounds.music.addEventListener('ended', function(){
-            if ( !this.pauseGame ) {
-                this.play();
-            }
+            this.play();
         }, false);
     };
     GameProperties.inheritsFrom(GameItem);
@@ -526,21 +547,13 @@
         this.lives--;
         this.addPoints(row, column, points);
 
-        if ( collectibleManager.hasKey ) {
+        if ( collectibleManager.keyTaken ) {
             collectibleManager.dropKey(row, column);
         }
-
         player.resetPosition();
     };
     GameProperties.prototype.playerCollectedGem = function(row, column, points) {
         this.addPoints(row, column, points);
-    };
-    GameProperties.prototype.playerCollectedHeart = function(row, column) {
-        this.lives++;
-    };
-    GameProperties.prototype.playerCollectedKey = function(row, column, points) {
-        this.addPoints(row, column, points);
-        collectibleManager.hasKey = true;
     };
     GameProperties.prototype.addPoints = function(row, column, points) {
         this.currentGamePoints += points;
@@ -561,7 +574,7 @@
             player.setCharacter(this.getSelectedCharacter());
         }
         else {
-            this.sounds.music.play();
+            //this.sounds.music.play();
         }
         if ( this.lives === 0 ) {
             this.sounds.gameOver.play();
@@ -621,7 +634,7 @@
         var xCoordinate = ctx.canvas.width - 35;
         var key = Resources.get('images/Key.png');
 
-        if ( collectibleManager.hasKey ) {
+        if ( collectibleManager.keyTaken ) {
             ctx.drawImage(key, xCoordinate, 5, 30, 50);
         }
     };
