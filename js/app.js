@@ -187,6 +187,7 @@
         }
     };
     Player.prototype._moveUp = function() {
+      console.log(this._reachTopRow());
         if ( this._reachTopRow() ) {
             if ( collectibleManager.keyTaken ) {
                 this.row--;
@@ -285,55 +286,30 @@
     };
     CollectibleManager.prototype._makeGems = function () {
         var gem = this.gem;
-        var rows = [];
-        var columns = [];
         _.loop(_.getRandom.apply(null, gem.many), function(){
             var row = this._getRow();
             var column = this._getColumn();
             var sound = new Audio(gem.sound);
             sound.volume = 0.15;
             var _kind = gem.kinds[_.getRandom(0, gem.kinds.length - 1)];
-
-            while ( _.inArray(rows, row) && _.inArray(columns, column) ) {
-                row = this._getRow();
-                column = this._getColumn();
-            }
-            rows.push(row);
-            columns.push(column);
             this.currentCollectibles.push(new Collectible(row, column, 'gem', sound, _kind.points, _kind.sprite));
         }.bind(this));
     };
     CollectibleManager.prototype._makeHearts = function () {
-        var rows = [];
-        var columns = [];
         var row;
         var column;
         var sound;
 
-        if ( _.chance(15) ) {
+        if ( gameProperties.lives <= 10 && _.chance(15) ) {
             row = this._getRow();
             column = this._getColumn();
             sound = new Audio(this.heart.sound);
-
-            while ( _.inArray(rows, row) && _.inArray(columns, column) ) {
-                row = this._getRow();
-                column = this._getColumn();
-            }
-            rows.push(row);
-            columns.push(column);
             this.currentCollectibles.push(new Collectible(row, column, 'heart', sound, null, this.heart.sprite));
         }
         if ( gameProperties.lives === 1 && _.chance(85) ) {
             row = this._getRow();
             column = this._getColumn();
             sound = new Audio(this.heart.sound);
-
-            while ( _.inArray(rows, row) && _.inArray(columns, column) ) {
-                row = this._getRow();
-                column = this._getColumn();
-            }
-            rows.push(row);
-            columns.push(column);
             this.currentCollectibles.push(new Collectible(row, column, 'heart', sound, null, this.heart.sprite));
         }
     };
@@ -500,6 +476,7 @@
         this.bestGamePoints = 0;
         this.showInfo = false;
         this.showPoints = [];
+        this.canResetRocks = true;
 
         this.characterSelection = 0;
         this.characterImages = [
@@ -529,6 +506,7 @@
         }
         this.currentGamePoints = 0;
         this.lives = 5;
+        this.canResetRocks = true;
         player.resetPosition();
         collectibleManager.resetCollectibles();
         rockManager.resetRocks();
@@ -541,6 +519,7 @@
         rockManager.resetRocks();
         player.resetPosition();
         collectibleManager.resetCollectibles();
+        this.canResetRocks = true;
     };
     GameProperties.prototype.playerCollidedWithEnemy = function(row, column, points) {
         this.sounds.died.play();
@@ -570,7 +549,7 @@
             showPoint.update(dt);
         }.bind(this));
         if ( this.pauseGame ) {
-            this.sounds.music.pause();
+            //this.sounds.music.pause();
             player.setCharacter(this.getSelectedCharacter());
         }
         else {
@@ -660,6 +639,12 @@
                     this.characterSelection++;
                 }
                 break;
+            case 'one':
+                if ( this.canResetRocks && player.row === this.SCREEN_ROWS )
+                    rockManager.resetRocks();
+                    this.canResetRocks = false;
+                break;
+
         }
     };
 
@@ -670,12 +655,12 @@
     w.player = new Player();
 
     w.allEnemies = [
-        new Enemy(),
-        new Enemy(),
-        new Enemy(),
-        new Enemy(),
-        new Enemy(),
-        new Enemy()
+      new Enemy(),
+      new Enemy(),
+      new Enemy(),
+      new Enemy(),
+      new Enemy(),
+      new Enemy()
     ];
 
     w.collectibleManager = new CollectibleManager();

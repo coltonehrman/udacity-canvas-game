@@ -20,9 +20,5 @@ var Utils = function() {
 		}
 	};
 
-	this.inArray = function(arr, item) {
-		return arr.indexOf(item) !== -1;
-	};
-
 };
 var _ = new Utils();
