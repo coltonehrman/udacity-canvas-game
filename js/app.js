@@ -187,7 +187,6 @@
         }
     };
     Player.prototype._moveUp = function() {
-      console.log(this._reachTopRow());
         if ( this._reachTopRow() ) {
             if ( collectibleManager.keyTaken ) {
                 this.row--;
@@ -465,7 +464,7 @@
         this.pauseGame = true;
         this.lives = 5;
         this.currentGamePoints = 0;
-        this.bestGamePoints = 0;
+        this.bestGamePoints = gameStorage.get('highScore');
         this.showInfo = false;
         this.showPoints = [];
         this.canResetRocks = true;
@@ -504,6 +503,7 @@
         rockManager.resetRocks();
     };
     GameProperties.prototype.playerReachedTopRow = function(column) {
+        gameStorage.update('highScore', this.bestGamePoints);
         this.sounds.nextLevel.play();
         if ( collectibleManager.currentCollectibles.length === 0 ) {
             this.addPoints(1, column, 100);
@@ -639,6 +639,29 @@
 
         }
     };
+
+    var GameStorage = function() {
+        if ( w.localStorage ) {
+            if ( !w.localStorage[this.storageName] ) {
+                w.localStorage.setItem(this.storageName, JSON.stringify({highScore: 0}));
+            }
+        }
+    };
+    GameStorage.prototype.storageName = 'froggerGame';
+    GameStorage.prototype.update = function(prop, value) {
+        var currentStorage = JSON.parse(w.localStorage.getItem(this.storageName));
+        currentStorage[prop] = value;
+        this.save(currentStorage);
+    };
+    GameStorage.prototype.save = function(newStorage) {
+        w.localStorage[this.storageName] = JSON.stringify(newStorage);
+    };
+    GameStorage.prototype.get = function(prop) {
+        var currentStorage = JSON.parse(w.localStorage.getItem(this.storageName));
+        return currentStorage[prop];
+    };
+
+    w.gameStorage = new GameStorage();
 
     w.gameProperties = new GameProperties();
 
