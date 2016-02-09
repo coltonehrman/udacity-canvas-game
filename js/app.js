@@ -351,19 +351,11 @@
     RockManager.inheritsFrom(GameItem);
     RockManager.prototype.removeRocks = function () { this.currentRocks = []; };
     RockManager.prototype.makeRocks = function() {
-        var rows = [];
-        var columns = [];
         var row;
         var column;
         _.loop(_.getRandom(7, 10), function(){
             row = this._getRow();
             column = this._getColumn();
-
-            while ( _.inArray(rows, row) && _.inArray(columns, column) ) {
-                row = this._getRow();
-                column = this._getColumn();
-            }
-
             this.currentRocks.push(new Rock(row, column));
         }.bind(this));
     };
