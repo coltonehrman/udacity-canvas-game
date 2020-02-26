@@ -11,7 +11,7 @@ Created this game as part of the Front End Web Developer - [NanoDegree](https://
 - *Movement* - Select your character using the arrow keys.
 - *Start* - When your desired character is highlighted you can press 'ESC' to start playing
 
-<img src="screenshots/pause_screen.png" />
+<img src="screenshots/play_screen.png" />
 
 **Play Screen**
 - *Movement* - You move your character around the board with the arrow keys (you cannot move vertically)
