@@ -438,6 +438,15 @@
         ctx.fillStyle = 'grey';
         ctx.fillText(title, x, y);
     };
+    Screen.prototype.drawInfo = function(info, x, y) {
+        ctx.textAlign = 'center';
+        ctx.font = '24px Nunito, sans-serif';
+        ctx.fillStyle = 'black';
+        ctx.fillText(info, x + 3, y + 3);
+
+        ctx.fillStyle = 'grey';
+        ctx.fillText(info, x, y);
+    };
 
 
     var PauseScreen = function() {
@@ -446,12 +455,15 @@
     PauseScreen.inheritsFrom(Screen);
     PauseScreen.prototype.render = function() {
         if ( gameProperties.pauseGame ) {
+
             this.renderOverlay();
             this.drawTitle('SELECT A CHARACTER', ctx.canvas.width / 2, 125);
-            gameProperties.drawCharacterSelect(100, 175, 150);
+			gameProperties.drawCharacterSelect(100, 175, 150);
+			this.drawInfo('Select a characer with the arrow keys.', ctx.canvas.width / 2, (ctx.canvas.height / 2) + 100);
+			this.drawInfo('Press \'ESC\' key to pause and play.', ctx.canvas.width / 2, (ctx.canvas.height / 2) + 150);
+			this.drawInfo('PAUSED', 85, ctx.canvas.height - 40);
         }
     };
-
 
     var GameProperties = function() {
         GameItem.call(this);
