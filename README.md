@@ -34,3 +34,7 @@ Created this game as part of the Front End Web Developer - [NanoDegree](https://
 <img src="images/Key.png" />
 
 *Key* - Obtain the key to reach the end. ***(Without the key you will be stuck at the end)***
+
+<img src="images/Heart.png" />
+
+*Heart* - Heart to add an extra live!
